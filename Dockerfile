@@ -8,6 +8,7 @@ ARG PY_BUILD_EXTRAS=""
 ARG USER=pyenv
 ARG GROUP=pyenv
 
+ENV CI_REQUIRES="ca-certificates git openssh-client tar gzip bash"
 ENV PY_BUILD_REQUIRES="build-base bzip2-dev libffi-dev ncurses-dev openssl-dev \
   readline-dev sqlite-dev tk-dev xz-dev zlib-dev $PY_BUILD_EXTRAS"
 
@@ -18,13 +19,11 @@ COPY install-python-versions.sh /home/$USER
 
 RUN chown $USER:$GROUP /home/$USER/install-*.sh \
   && chmod +x /home/$USER/install-*.sh \
-  && apk add --no-cache ca-certificates git bash \
-  && apk add --no-cache --virtual build-deps $PY_BUILD_REQUIRES \
+  && chown -R $USER:$GROUP /usr/local/* \
+  && apk add --no-cache $CI_REQUIRES \
+  && apk add --no-cache $PY_BUILD_REQUIRES \
   && su $USER sh -c "cd && ./install-pyenv.sh" \
-  && su $USER sh -c "cd && ./install-python-versions.sh" \
-  && apk del --no-cache --purge git \
-  && apk del --no-cache --purge build-deps \
-  && rm -rf /var/cache/apk/*
+  && su $USER sh -c "cd && ./install-python-versions.sh"
 
 USER $USER
 WORKDIR /home/$USER

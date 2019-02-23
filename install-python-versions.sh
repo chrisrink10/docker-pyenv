@@ -7,7 +7,8 @@ source ~/.bash_profile
 
 IFS="$INSTALL_PY_VERSIONS_SEP" read -ra PY_VERSIONS <<< "$INSTALL_PY_VERSIONS"
 for version in "${PY_VERSIONS[@]}"; do
-    pyenv install "$version"
+    pyenv install "$version" &
 done
+wait
 
 pyenv global $(echo "$INSTALL_PY_VERSIONS" | sed 's/,/ /g')
